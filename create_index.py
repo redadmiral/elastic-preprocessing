@@ -46,18 +46,32 @@ print("Delete everything that's not PER, LOC or ORG...")
 pr = pr[pr["wd_url"].isin(legit_ids)]
 
 print("Write PageRank index as CSV...")
-pr.to_csv(config.RANK_OUTPUT_PATH)
+pr.to_csv(config.RANK_FILTERED_PATH)
 
 
 print("Create PR index...")
-
-
 helpers.check_and_delete(config.PR_INDEX_NAME, elastic)
-
 eshelp.bulk(elastic, helpers.doc_generator(pr, config.PR_INDEX_NAME, config.PR_KEYS))
 
-print("Load Embeddings...")
+print("Load Altlabel data...")
+with open(config.ALTLABELS_PATH) as f:
+    labels = pd.read_csv(f)
 
+labels.columns = ["wd_url", "altlabel"]
+
+print("Delete everything that's not PER, LOC or ORG...")
+labels = labels[labels["wd_url"].isin(legit_ids)]
+
+print("Write AltLabels index as CSV...")
+labels.to_csv(config.ALTLABELS_FILTERED_PATH)
+
+
+print("Create AltLabel index...")
+helpers.check_and_delete(config.ALTLABELS_INDEX_NAME, elastic)
+eshelp.bulk(elastic, helpers.doc_generator(labels, config.ALTLABELS_INDEX_NAME, config.ALTLABELS_INDEX_NAME))
+
+
+print("Load Embeddings...")
 embeddings = pd.DataFrame()
 
 with io.TextIOWrapper(io.BufferedReader(gzip.open(config.EMBEDDINGS_PATH))) as file:
@@ -68,10 +82,11 @@ with io.TextIOWrapper(io.BufferedReader(gzip.open(config.EMBEDDINGS_PATH))) as f
             print(wd_url)
             embedding: List[float] = [float(i) for i in line_parts[1:]]
             embeddings = embeddings.append([[wd_url, embedding]])
-
 embeddings.columns = ["wd_url", "embedding"]
 
 print("Create embedding index...")
 
 helpers.check_and_delete(config.EMBEDDING_INDEX_NAME, elastic)
 eshelp.bulk(elastic, helpers.doc_generator(embeddings, config.EMBEDDING_INDEX_NAME, config.EMBEDDINGS_KEYS))
+
+print("Indices created successfully.")
