@@ -2,11 +2,9 @@ import config
 import json
 from typing import Dict
 import pandas as pd
-import numpy as np
 import elasticsearch as es
 from elasticsearch import helpers as eshelp
 import helpers
-import warnings
 import gzip
 import io
 from typing import List
