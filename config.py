@@ -6,13 +6,13 @@ ELASTIC_PORT = 9200
 
 # input files
 NECKAR_PATH = "data/neckar.json"
-RANK_PATH = "data/response_pr.json"
+RANK_PATH = "data/response_pr.csv"
 EMBEDDINGS_PATH = "data/wikidata_translation_v1.tsv.gz"
-ALTLABELS_PATH = "data/response_altlabels.json"
+ALTLABELS_PATH = "data/response_altlabels.csv"
 
 # path to output files
 RANK_FILTERED_PATH = "data/pr_filtered.csv"
-EMBEDDINGS_FILTERED_PATH = "data/embeddings_index.csv"
+EMBEDDINGS_FILTERED_PATH = "data/embeddings_filtered.csv"
 ALTLABELS_FILTERED_PATH = "data/altlabels_filtered.csv"
 
 # Keys from neckar file, which shall be in the es index
