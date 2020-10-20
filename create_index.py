@@ -12,11 +12,13 @@ from typing import List
 elastic = es.Elasticsearch([{"host" : config.ELASTIC_URL, "port": config.ELASTIC_PORT}])
 neckar: pd.DataFrame = pd.DataFrame()
 
+total_lines: int = 1200000
 linecount: int = 0
 print("Load NECKar dataset...")
 with open(config.NECKAR_PATH) as f:
     for line in f:
-        helpers.linecount(linecount)
+        if linecount % 10000 == 0:
+            print("Loading NECKar dataset line " + str(linecount) + " (" + str(round(linecount/total_lines*100, 2)) + "%).")
         js: Dict = json.loads(line)
         df = [[("").join(["http://www.wikidata.org/entity/", js["WD_id"]]), js["WP_id_URL"], js["dbpedia_URL"], js["label"], js["neClass"]]]
         neckar = neckar.append(df)
