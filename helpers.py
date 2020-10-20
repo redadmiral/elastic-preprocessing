@@ -19,3 +19,8 @@ def check_and_delete(index_name: str, es_client: es.Elasticsearch):
     if es_client.indices.exists(index_name):
         es_client.indices.delete(index_name)
         warnings.warn("Existing elasticSearch index " + index_name + " deleted.")
+
+def linecount(linecount: int):
+        linecount = linecount + 1
+        if linecount % 50000 == 0:
+            print("Loading Line" + str(linecount) +".\n")
