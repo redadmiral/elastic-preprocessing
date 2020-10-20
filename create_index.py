@@ -16,12 +16,12 @@ print("Load NECKar dataset...")
 with open(config.NECKAR_PATH) as f:
     for line in f:
         js: Dict = json.loads(line)
-        df = [[("").join(["http://www.wikidata.org/entity/", js["WD_id"]]), js["WP_id_URL"], js["dbpedia_URL"], js["label"]]]
+        df = [[("").join(["http://www.wikidata.org/entity/", js["WD_id"]]), js["WP_id_URL"], js["dbpedia_URL"], js["label"], js["neClass"]]]
         neckar = neckar.append(df)
 
 print("Remove duplicate entries...")
-neckar.columns = ["wd_url", "wp_url", "dbp_id", "label"]
-neckar = neckar.drop_duplicates()
+neckar.columns = ["wd_url", "wp_url", "dbp_id", "label", "neClass"]
+neckar.to_csv(config.NECKAR_FILTERED_PATH)
 
 print("Create neckar_index...")
 

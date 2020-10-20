@@ -1,4 +1,3 @@
-import config
 from typing import Dict, List
 import elasticsearch as es
 import warnings

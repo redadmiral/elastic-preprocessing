@@ -23,4 +23,9 @@ echo Unpack neckar.json.gz
 cd data/ || exit
 gzip -d < neckar.json.gz > neckar.json
 
+echo Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+pip -r install requirements.txt
+
 echo Finished. Please continue by executing python create_index.py.
