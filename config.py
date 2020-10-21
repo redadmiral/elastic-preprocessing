@@ -29,7 +29,7 @@ EMBEDDINGS_FILTERED_PATH = "data/embeddings_filtered.csv"
 ALTLABELS_FILTERED_PATH = "data/altlabels_filtered.csv"
 
 # Keys from neckar file, which shall be in the es index
-NECKAR_KEYS = ["wd_url", "wp_url", "dbp_id", "label", "neClass"]
+NECKAR_KEYS = ["wd_url", "wp_url", "dbp_url", "label", "class"]
 PR_KEYS = ["pr"]
 EMBEDDINGS_KEYS = ["embedding"]
 ALTLABELS_KEYS = ["altlabel", "wd_url"]
