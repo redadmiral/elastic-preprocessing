@@ -98,15 +98,14 @@ with io.TextIOWrapper(io.BufferedReader(gzip.open(config.EMBEDDINGS_PATH))) as f
         line_parts: List[str] = line.split("\t")
         wd_url: str = line_parts[0][1:-1]
         if wd_url in legit_ids:
-            print(wd_url)
             embedding: List[float] = [float(i) for i in line_parts[1:]]
             embeddings = embeddings.append([[wd_url, embedding]])
 
 embeddings.columns = ["wd_url", "embedding"]
 
+embeddings.to_csv(config.EMBEDDINGS_FILTERED_PATH)
 endtime = time.time()
 print("Embeddings evaluation time: " + str(endtime-starttime))
-
 
 print("Create embedding index...", flush=True)
 

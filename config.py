@@ -3,7 +3,7 @@ from decouple import config, UndefinedValueError
 test: str = "test_"
 
 try:
-    if config("PRODUCTION") == True:
+    if config("PRODUCTION") == "True":
         test = ""
 except UndefinedValueError:
     raise UndefinedValueError("Please define an environment variable 'PRODUCTION' with value True or False. If set to true production indices of elastic search will be overwritten.")
@@ -20,7 +20,7 @@ ELASTIC_PORT = 9200
 NECKAR_PATH = "data/neckar.json"
 RANK_PATH = "data/response_pr.csv"
 EMBEDDINGS_PATH = "data/wikidata_translation_v1.tsv.gz"
-ALTLABELS_PATH = "data/response_altLabels.csv"
+ALTLABELS_PATH = "data/response_altlabels.csv"
 
 # path to output files
 NECKAR_FILTERED_PATH = "data/neckar_filtered.csv"
