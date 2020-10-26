@@ -58,7 +58,8 @@ if not os.path.isfile(config.DBP_LANGLINKS_FILTERED):
 else:
     print(config.DBP_LANGLINKS_FILTERED + " found.")
     langlinks = pd.read_csv(config.DBP_LANGLINKS_FILTERED)
-    langlinks.columns = ["dbp_url", "en"]
+    langlinks.columns = ["bla", "dbp_url", "en"]
+    langlinks = langlinks.drop("bla", axis=1)
 
 legit_dbp_ids: pd.DataFrame = langlinks.set_index("en")
 legit_dbp_ids = legit_dbp_ids.to_dict()
@@ -72,7 +73,7 @@ for file in config.DBP_PATH:
         print("Parse file " + file, flush=True)
         embeddings: pd.DataFrame = pd.DataFrame()
         keyed_vectors = gensim.models.KeyedVectors.load(file)
-        for id in legit_dbp_ids.keys():
+        for id in legit_dbp_ids["dbp_url"]:
             try:
                 embedding: np.array = keyed_vectors.get_vector(id)
                 embeddings.append([[legit_dbp_ids[id], embedding]])
