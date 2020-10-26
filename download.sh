@@ -1,7 +1,16 @@
 #! /bin/bash
 
-echo Download embeddings...
+echo Download wikidata embeddings...
 curl https://dl.fbaipublicfiles.com/torchbiggraph/wikidata_translation_v1.tsv.gz | gunzip - | grep wikidata | gzip > wikidata_translation_v1.tsv.gz
+
+echo Download DBPedia embeddings - Depth 4 - 100 dimensions - SkipGram
+curl http://data.dws.informatik.uni-mannheim.de/kgvec2go/iswc/dbpedia_500_4_sg_100/dbpedia_500_4_sg_100_vectors.kv -o dbpedia_500_4_sg_100_vectors.kv
+
+echo Download DBPedia embeddings - Depth 4 - 200 dimensions - SkipGram
+curl http://data.dws.informatik.uni-mannheim.de/kgvec2go/iswc/dbpedia_500_4_sg_200/dbpedia_500_4_sg_200_vectors.kv -o dbpedia_500_4_sg_200_vectors.kv
+
+echo Download DBPedia embeddings - Depth 4 - 200 dimensions - CBOW
+curl http://data.dws.informatik.uni-mannheim.de/kgvec2go/iswc/dbpedia_500_4_cbow_200/dbpedia_500_4_cbow_200_v2.kv -o dbpedia_500_4_cbow_200_v2.kv
 
 echo Download NECKar dump...
 curl -L http://event.ifi.uni-heidelberg.de/wp-content/uploads/2017/05/WikidataDELODLinks_20170320_NECKAR_1_0.json_.gz -o neckar.json.gz

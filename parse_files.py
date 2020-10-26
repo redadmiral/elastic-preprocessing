@@ -1,0 +1,140 @@
+import config
+import json
+import pandas as pd
+import numpy as np
+import gzip
+import io
+from typing import List
+import time
+import gensim
+import os
+
+###### NECKAR
+
+if not os.path.isfile(config.NECKAR_FILTERED_PATH):
+    starttime = time.time()
+    print("No filtered NECKAR dataset found.\nParsing NECKar dataset...", flush=True)
+    with open(config.NECKAR_PATH) as f:
+        lines=f.read().splitlines()
+
+    print("Load as pandas df", flush=True)
+    df_inter = pd.DataFrame(lines)
+    df_inter.columns = ['json_element']
+
+    df_inter['json_element'].apply(json.loads)
+
+    neckar = pd.json_normalize(df_inter['json_element'].apply(json.loads))
+    neckar = neckar[['neClass', 'dbpedia_URL', 'WP_id_URL',
+           'WD_id', 'label']]
+
+    neckar['WD_id'] = 'http://www.wikidata.org/entity/' + neckar['WD_id'].astype(str)
+
+    neckar.columns = ["class", "dbp_url", "wp_url", "wd_url", "label"]
+    neckar.to_csv(config.NECKAR_FILTERED_PATH)
+
+    endtime = time.time()
+    print("NECKar evaluation time: " + str(endtime-starttime))
+
+    legit_ids: set = set(neckar["wd_url"])
+    legit_dbp_ids: set = set(label.replace("http://de.dbpedia.org/resource/", "dbr:") for label in neckar["dbp_url"])
+else:
+    print("NECKAR dataset found. Extract IDs for mapping.", flush=True)
+    neckar = pd.read_csv(config.NECKAR_FILTERED_PATH)
+    legit_ids: set = set(neckar["wd_url"])
+    legit_dbp_ids: set = set(label.replace("http://de.dbpedia.org/resource/", "dbr:") for label in neckar["dbp_url"])
+
+######### DBP
+
+print("Load DBPedia embeddings...", flush=True)
+for file in config.DBP_PATH:
+    filtered_file = "".join([file[:-3], "_filtered.csv"])
+    if not os.path.isfile(filtered_file):
+        starttime = time.time()
+        print("Parse file " + file, flush=True)
+        embeddings: pd.DataFrame = pd.DataFrame()
+        keyed_vectors = gensim.models.KeyedVectors.load(file)
+        for id in legit_dbp_ids:
+            try:
+                embedding: np.array = keyed_vectors.get_vector(id)
+                embeddings.append([[id, embedding]])
+            except KeyError:
+                pass
+        try:
+            embeddings.columns = ["dbp_url", "embedding"]
+            embeddings["dbp_url"] = [label.replace("dbr:", "http://de.dbpedia.org/resource/") for label in embeddings["dbp_url"]]
+        except ValueError:
+            print(file + " is empty.")
+        print("Write as csv...")
+        embeddings.to_csv("data/" + file[:-3] + "_filtered.csv")
+        endtime = time.time()
+        print(file + " evaluation time: " + str(endtime - starttime), flush=True)
+    else:
+        print(filtered_file + " found.", flush=True)
+
+
+
+########## PR
+
+if not os.path.isfile(config.RANK_FILTERED_PATH):
+    print("Load PageRank data...", flush=True)
+    starttime = time.time()
+    with open(config.RANK_PATH) as f:
+        pr = pd.read_csv(f)
+
+    pr.columns = ["wd_url", "pr"]
+
+    print("Delete everything that's not PER, LOC or ORG...", flush=True)
+    pr = pr[pr["wd_url"].isin(legit_ids)]
+
+    print("Write PageRank index as CSV...", flush=True)
+    pr.to_csv(config.RANK_FILTERED_PATH)
+    endtime = time.time()
+    print("PR evaluation time: " + str(endtime-starttime), flush=True)
+else:
+    print("PR file found.", flush=True)
+
+##### ALTLABELS
+
+if not os.path.isfile(config.ALTLABELS_FILTERED_PATH):
+    print("Load Altlabel data...", flush=True)
+    starttime = time.time()
+    with open(config.ALTLABELS_PATH) as f:
+        labels = pd.read_csv(f)
+
+    labels.columns = ["wd_url", "altlabel"]
+
+    print("Delete everything that's not PER, LOC or ORG...", flush=True)
+    labels = labels[labels["wd_url"].isin(legit_ids)]
+
+    print("Write AltLabels index as CSV...", flush=True)
+    labels.to_csv(config.ALTLABELS_FILTERED_PATH)
+
+    endtime = time.time()
+    print("Altlabels evaluation time: " + str(endtime-starttime), flush=True)
+else:
+    print("Altlabels found.", flush=True)
+
+####### EMBEDDINGS
+
+if not os.path.isfile(config.EMBEDDINGS_FILTERED_PATH):
+    print("Load Embeddings...", flush=True)
+    embeddings = pd.DataFrame()
+    starttime = time.time()
+
+    with io.TextIOWrapper(io.BufferedReader(gzip.open(config.EMBEDDINGS_PATH))) as file:
+        for line in file:
+            line_parts: List[str] = line.split("\t")
+            wd_url: str = line_parts[0][1:-1]
+            if wd_url in legit_ids:
+                embedding: List[float] = [float(i) for i in line_parts[1:]]
+                embeddings = embeddings.append([[wd_url, embedding]])
+
+    embeddings.columns = ["wd_url", "embedding"]
+
+    embeddings.to_csv(config.EMBEDDINGS_FILTERED_PATH)
+    endtime = time.time()
+    print("Embeddings evaluation time: " + str(endtime-starttime))
+else:
+    print(config.EMBEDDINGS_FILTERED_PATH + " found.", flush=True)
+
+print("All files successfully parsed. Please run load_data.py.", flush=True)

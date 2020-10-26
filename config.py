@@ -21,12 +21,15 @@ NECKAR_PATH = "data/neckar.json"
 RANK_PATH = "data/response_pr.csv"
 EMBEDDINGS_PATH = "data/wikidata_translation_v1.tsv.gz"
 ALTLABELS_PATH = "data/response_altlabels.csv"
-
+DBP_PATH = [
+    "data/dbpedia_500_4_sg_100_vectors.kv"
+]
 # path to output files
 NECKAR_FILTERED_PATH = "data/neckar_filtered.csv"
 RANK_FILTERED_PATH = "data/pr_filtered.csv"
 EMBEDDINGS_FILTERED_PATH = "data/embeddings_filtered.csv"
 ALTLABELS_FILTERED_PATH = "data/altlabels_filtered.csv"
+
 
 # Keys from neckar file, which shall be in the es index
 NECKAR_KEYS = ["wd_url", "wp_url", "dbp_url", "label", "class"]
