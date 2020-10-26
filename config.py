@@ -24,6 +24,8 @@ ALTLABELS_PATH = "data/response_altlabels.csv"
 DBP_PATH = [
     "data/dbpedia_500_4_sg_100_vectors.kv"
 ]
+DBP_LANGLINKS = "data/interlanguage-links_de_en.ttl"
+DBP_LANGLINKS_FILTERED = "data/interlanguage-links_de_en_filtered.csv"
 # path to output files
 NECKAR_FILTERED_PATH = "data/neckar_filtered.csv"
 RANK_FILTERED_PATH = "data/pr_filtered.csv"

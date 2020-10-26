@@ -36,14 +36,33 @@ if not os.path.isfile(config.NECKAR_FILTERED_PATH):
     print("NECKar evaluation time: " + str(endtime-starttime))
 
     legit_ids: set = set(neckar["wd_url"])
-    legit_dbp_ids: set = set(label.replace("http://de.dbpedia.org/resource/", "dbr:") for label in neckar["dbp_url"])
+    dbp_ids: set = set(label.replace("http://de.dbpedia.org/resource/", "dbr:") for label in neckar["dbp_url"])
 else:
     print("NECKAR dataset found. Extract IDs for mapping.", flush=True)
     neckar = pd.read_csv(config.NECKAR_FILTERED_PATH)
     legit_ids: set = set(neckar["wd_url"])
-    legit_dbp_ids: set = set(label.replace("http://de.dbpedia.org/resource/", "dbr:") for label in neckar["dbp_url"])
+    dbp_ids: pd.DataFrame = pd.DataFrame(label.replace("http://de.dbpedia.org/resource/", "dbr:") for label in neckar["dbp_url"])
+    dbp_ids.columns = ["dbp_url"]
 
 ######### DBP
+
+if not os.path.isfile(config.DBP_LANGLINKS_FILTERED):
+    print("filtering dbp language links.")
+    langlinks = pd.read_csv(config.DBP_LANGLINKS, sep=" ")
+    langlinks.columns = ["dbp_url", "pred", "en", "."]
+    langlinks = langlinks.drop(["pred", "."], axis=1)
+    langlinks = langlinks.replace(regex={"<http://de.dbpedia.org/resource/": "dbr:","<http://dbpedia.org/resource/" : "dbr:", ">": ""})
+    langlinks = langlinks.merge(right=dbp_ids, on="dbp_url")
+    langlinks = langlinks.drop_duplicates()
+    langlinks.to_csv(config.DBP_LANGLINKS_FILTERED)
+else:
+    print(config.DBP_LANGLINKS_FILTERED + " found.")
+    langlinks = pd.read_csv(config.DBP_LANGLINKS_FILTERED)
+    langlinks.columns = ["dbp_url", "en"]
+
+legit_dbp_ids: pd.DataFrame = langlinks.set_index("en")
+legit_dbp_ids = legit_dbp_ids.to_dict()
+
 
 print("Load DBPedia embeddings...", flush=True)
 for file in config.DBP_PATH:
@@ -53,19 +72,19 @@ for file in config.DBP_PATH:
         print("Parse file " + file, flush=True)
         embeddings: pd.DataFrame = pd.DataFrame()
         keyed_vectors = gensim.models.KeyedVectors.load(file)
-        for id in legit_dbp_ids:
+        for id in legit_dbp_ids.keys():
             try:
                 embedding: np.array = keyed_vectors.get_vector(id)
-                embeddings.append([[id, embedding]])
+                embeddings.append([[legit_dbp_ids[id], embedding]])
             except KeyError:
                 pass
         try:
             embeddings.columns = ["dbp_url", "embedding"]
             embeddings["dbp_url"] = [label.replace("dbr:", "http://de.dbpedia.org/resource/") for label in embeddings["dbp_url"]]
+            print("Write as csv...")
+            embeddings.to_csv(file[:-3] + "_filtered.csv")
         except ValueError:
             print(file + " is empty.")
-        print("Write as csv...")
-        embeddings.to_csv("data/" + file[:-3] + "_filtered.csv")
         endtime = time.time()
         print(file + " evaluation time: " + str(endtime - starttime), flush=True)
     else:

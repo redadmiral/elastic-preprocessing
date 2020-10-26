@@ -12,6 +12,10 @@ curl http://data.dws.informatik.uni-mannheim.de/kgvec2go/iswc/dbpedia_500_4_sg_2
 echo Download DBPedia embeddings - Depth 4 - 200 dimensions - CBOW
 curl http://data.dws.informatik.uni-mannheim.de/kgvec2go/iswc/dbpedia_500_4_cbow_200/dbpedia_500_4_cbow_200_v2.kv -o dbpedia_500_4_cbow_200_v2.kv
 
+echo Download DBPedia interlanguage Links
+curl https://downloads.dbpedia.org/repo/dbpedia/generic/interlanguage-links/2016.10.01/interlanguage-links_lang=de.ttl.bz2 -o interlanguage-links_lang=de.ttl.bz2
+bunzip interlanguage-links_lang=de.ttl.bz2 > grep http://dbpedia.org/resource > interlanguage-links_de_en.ttl
+
 echo Download NECKar dump...
 curl -L http://event.ifi.uni-heidelberg.de/wp-content/uploads/2017/05/WikidataDELODLinks_20170320_NECKAR_1_0.json_.gz -o neckar.json.gz
 
