@@ -4,8 +4,11 @@ from elasticsearch import helpers as eshelp
 import helpers
 import decouple
 import os
+import pandas as pd
+import numpy as np
+from typing import List
 
-elastic = es.Elasticsearch([{"host" : config.ELASTIC_URL, "port": config.ELASTIC_PORT}])
+elastic = es.Elasticsearch([{"host": config.ELASTIC_URL, "port": config.ELASTIC_PORT}])
 
 if decouple.config("PRODUCTION") == "True":
     print("Write to production indices.", flush=True)
@@ -23,12 +26,16 @@ for file in filtered_files:
     index_name =  test + file[:-13]
     index_names = index_names.append(index_name)
     print("Create " + index_name + " index.", flush=True)
+    csv = pd.read_csv(file)
+    if "embedding" in csv.columns:
+        csv["embedding"] = np.array(csv["embedding"])
     helpers.check_and_delete(index_name, elastic)
-    eshelp.bulk(elastic, helpers.doc_generator(index_name, index_name, config.NECKAR_KEYS))
+    eshelp.bulk(elastic, helpers.doc_generator(csv, index_name))
 
-response = ["Created the indizes\n"]
+response: List[str] = ["Created the indizes\n"]
+
 for index in index_names:
-    response = response.append("  + " + index + "\n")
+    response.append("  + " + index + "\n")
+response.append("on elasticsearch instance " + config.ELASTIC_URL + ":" + config.ELASTIC_PORT + ".")
 
-response = response.append("on elasticsearch instance " + config.ELASTIC_URL + ":" + config.ELASTIC_PORT + ".")
-print(response, flush=True)
+print("".join(response), flush=True)

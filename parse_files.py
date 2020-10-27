@@ -29,20 +29,18 @@ if not os.path.isfile(config.NECKAR_FILTERED_PATH):
 
     neckar['WD_id'] = 'http://www.wikidata.org/entity/' + neckar['WD_id'].astype(str)
 
-    neckar.columns = ["class", "dbp_url", "wp_url", "wd_url", "label"]
+    neckar.columns = ["class", "dbp_url", "wp_url", "id", "label"]
     neckar.to_csv(config.NECKAR_FILTERED_PATH)
-
+    neckar.columns = ["class", "dbp_url", "wp_url", "wd_url", "label"]
     endtime = time.time()
     print("NECKar evaluation time: " + str(endtime-starttime))
-
-    legit_ids: set = set(neckar["wd_url"])
-    dbp_ids: set = set(label.replace("http://de.dbpedia.org/resource/", "dbr:") for label in neckar["dbp_url"])
 else:
     print("NECKAR dataset found. Extract IDs for mapping.", flush=True)
     neckar = pd.read_csv(config.NECKAR_FILTERED_PATH)
-    legit_ids: set = set(neckar["wd_url"])
-    dbp_ids: pd.DataFrame = pd.DataFrame(label.replace("http://de.dbpedia.org/resource/", "dbr:") for label in neckar["dbp_url"])
-    dbp_ids.columns = ["dbp_url"]
+
+legit_ids: set = set(neckar["wd_url"])
+dbp_ids: pd.DataFrame = pd.DataFrame(label.replace("http://de.dbpedia.org/resource/", "dbr:") for label in neckar["dbp_url"])
+dbp_ids.columns = ["dbp_url"]
 
 ######### DBP
 
@@ -76,16 +74,17 @@ for file in config.DBP_PATH:
         for id in legit_dbp_ids["dbp_url"]:
             try:
                 embedding: np.array = keyed_vectors.get_vector(id)
-                embeddings.append([[legit_dbp_ids[id], embedding]])
+                embeddings  = embeddings.append([[legit_dbp_ids["dbp_url"][id], embedding]]) # assign the german dbp label
             except KeyError:
                 pass
         try:
             embeddings.columns = ["dbp_url", "embedding"]
             embeddings["dbp_url"] = [label.replace("dbr:", "http://de.dbpedia.org/resource/") for label in embeddings["dbp_url"]]
             print("Write as csv...")
+            embeddings.columns = ["id", "embedding"]
             embeddings.to_csv(file[:-3] + "_filtered.csv")
         except ValueError:
-            print(file + " is empty.")
+            print(file + "_filtered.csv is empty. Will not write file.")
         endtime = time.time()
         print(file + " evaluation time: " + str(endtime - starttime), flush=True)
     else:
@@ -107,6 +106,7 @@ if not os.path.isfile(config.RANK_FILTERED_PATH):
     pr = pr[pr["wd_url"].isin(legit_ids)]
 
     print("Write PageRank index as CSV...", flush=True)
+    pr.columns = ["id", "pr"]
     pr.to_csv(config.RANK_FILTERED_PATH)
     endtime = time.time()
     print("PR evaluation time: " + str(endtime-starttime), flush=True)
@@ -127,6 +127,7 @@ if not os.path.isfile(config.ALTLABELS_FILTERED_PATH):
     labels = labels[labels["wd_url"].isin(legit_ids)]
 
     print("Write AltLabels index as CSV...", flush=True)
+    labels.columns = ["id", "altlabel"]
     labels.to_csv(config.ALTLABELS_FILTERED_PATH)
 
     endtime = time.time()
@@ -149,7 +150,7 @@ if not os.path.isfile(config.EMBEDDINGS_FILTERED_PATH):
                 embedding: List[float] = [float(i) for i in line_parts[1:]]
                 embeddings = embeddings.append([[wd_url, embedding]])
 
-    embeddings.columns = ["wd_url", "embedding"]
+    embeddings.columns = ["id", "embedding"]
 
     embeddings.to_csv(config.EMBEDDINGS_FILTERED_PATH)
     endtime = time.time()
