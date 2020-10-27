@@ -21,8 +21,8 @@ EMBEDDINGS_PATH = "data/wikidata_translation_v1.tsv.gz"
 ALTLABELS_PATH = "data/response_altlabels.csv"
 DBP_PATH = [
     "data/dbpedia_500_4_sg_100_vectors.kv",
-    "data/dbpedia_500_4_cbow_200_v2.kv",
-    "data/dbpedia_500_4_sg_200_vectors.kv"
+#    "data/dbpedia_500_4_cbow_200_v2.kv",
+#    "data/dbpedia_500_4_sg_200_vectors.kv"
 ]
 DBP_LANGLINKS = "data/interlanguage-links_de_en.ttl"
 DBP_LANGLINKS_FILTERED = "data/interlanguage-links_de_en_parsed.csv"

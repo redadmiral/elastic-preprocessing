@@ -30,14 +30,14 @@ if not os.path.isfile(config.NECKAR_FILTERED_PATH):
     neckar['WD_id'] = 'http://www.wikidata.org/entity/' + neckar['WD_id'].astype(str)
 
     neckar.columns = ["class", "dbp_url", "wp_url", "id", "label"]
-    neckar.to_csv(config.NECKAR_FILTERED_PATH)
-    neckar.columns = ["class", "dbp_url", "wp_url", "wd_url", "label"]
+    neckar.to_csv(config.NECKAR_FILTERED_PATH, index=False)
     endtime = time.time()
     print("NECKar evaluation time: " + str(endtime-starttime))
 else:
     print("NECKAR dataset found. Extract IDs for mapping.", flush=True)
     neckar = pd.read_csv(config.NECKAR_FILTERED_PATH)
 
+neckar.columns = ["class", "dbp_url", "wp_url", "wd_url", "label"]
 legit_ids: set = set(neckar["wd_url"])
 dbp_ids: pd.DataFrame = pd.DataFrame(label.replace("http://de.dbpedia.org/resource/", "dbr:") for label in neckar["dbp_url"])
 dbp_ids.columns = ["dbp_url"]
@@ -52,12 +52,11 @@ if not os.path.isfile(config.DBP_LANGLINKS_FILTERED):
     langlinks = langlinks.replace(regex={"<http://de.dbpedia.org/resource/": "dbr:","<http://dbpedia.org/resource/" : "dbr:", ">": ""})
     langlinks = langlinks.merge(right=dbp_ids, on="dbp_url")
     langlinks = langlinks.drop_duplicates()
-    langlinks.to_csv(config.DBP_LANGLINKS_FILTERED)
+    langlinks.to_csv(config.DBP_LANGLINKS_FILTERED, index = False)
 else:
     print(config.DBP_LANGLINKS_FILTERED + " found.")
     langlinks = pd.read_csv(config.DBP_LANGLINKS_FILTERED)
-    langlinks.columns = ["bla", "dbp_url", "en"]
-    langlinks = langlinks.drop("bla", axis=1)
+    langlinks.columns = ["dbp_url", "en"]
 
 legit_dbp_ids: pd.DataFrame = langlinks.set_index("en")
 legit_dbp_ids = legit_dbp_ids.to_dict()
@@ -73,8 +72,8 @@ for file in config.DBP_PATH:
         keyed_vectors = gensim.models.KeyedVectors.load(file)
         for id in legit_dbp_ids["dbp_url"]:
             try:
-                embedding: np.array = keyed_vectors.get_vector(id)
-                embeddings  = embeddings.append([[legit_dbp_ids["dbp_url"][id], embedding]]) # assign the german dbp label
+                embedding = keyed_vectors.get_vector(id).tolist()
+                embeddings = embeddings.append([[legit_dbp_ids["dbp_url"][id], embedding]]) # assign the german dbp label
             except KeyError:
                 pass
         try:
@@ -82,7 +81,7 @@ for file in config.DBP_PATH:
             embeddings["dbp_url"] = [label.replace("dbr:", "http://de.dbpedia.org/resource/") for label in embeddings["dbp_url"]]
             print("Write as csv...")
             embeddings.columns = ["id", "embedding"]
-            embeddings.to_csv(file[:-3] + "_filtered.csv")
+            embeddings.to_csv(file[:-3] + "_filtered.csv", index=False)
         except ValueError:
             print(file + "_filtered.csv is empty. Will not write file.")
         endtime = time.time()
@@ -107,7 +106,7 @@ if not os.path.isfile(config.RANK_FILTERED_PATH):
 
     print("Write PageRank index as CSV...", flush=True)
     pr.columns = ["id", "pr"]
-    pr.to_csv(config.RANK_FILTERED_PATH)
+    pr.to_csv(config.RANK_FILTERED_PATH, index=False)
     endtime = time.time()
     print("PR evaluation time: " + str(endtime-starttime), flush=True)
 else:
@@ -128,7 +127,7 @@ if not os.path.isfile(config.ALTLABELS_FILTERED_PATH):
 
     print("Write AltLabels index as CSV...", flush=True)
     labels.columns = ["id", "altlabel"]
-    labels.to_csv(config.ALTLABELS_FILTERED_PATH)
+    labels.to_csv(config.ALTLABELS_FILTERED_PATH, index=False)
 
     endtime = time.time()
     print("Altlabels evaluation time: " + str(endtime-starttime), flush=True)
@@ -152,7 +151,7 @@ if not os.path.isfile(config.EMBEDDINGS_FILTERED_PATH):
 
     embeddings.columns = ["id", "embedding"]
 
-    embeddings.to_csv(config.EMBEDDINGS_FILTERED_PATH)
+    embeddings.to_csv(config.EMBEDDINGS_FILTERED_PATH, index=False)
     endtime = time.time()
     print("Embeddings evaluation time: " + str(endtime-starttime))
 else:

@@ -23,19 +23,19 @@ index_names = []
 
 
 for file in filtered_files:
-    index_name =  test + file[:-13]
-    index_names = index_names.append(index_name)
+    index_name = test + file[5:-13]
+    index_names.append(index_name)
     print("Create " + index_name + " index.", flush=True)
     csv = pd.read_csv(file)
     if "embedding" in csv.columns:
-        csv["embedding"] = np.array(csv["embedding"])
-    helpers.check_and_delete(index_name, elastic)
+        csv["embedding"] = list(csv["embedding"])
+        helpers.check_and_delete(index_name, elastic)
     eshelp.bulk(elastic, helpers.doc_generator(csv, index_name))
 
-response: List[str] = ["Created the indizes\n"]
+response: List[str] = ["Created the indices\n"]
 
 for index in index_names:
     response.append("  + " + index + "\n")
-response.append("on elasticsearch instance " + config.ELASTIC_URL + ":" + config.ELASTIC_PORT + ".")
+response.append("on elasticsearch instance " + config.ELASTIC_URL + ":" + str(config.ELASTIC_PORT) + ".")
 
 print("".join(response), flush=True)
