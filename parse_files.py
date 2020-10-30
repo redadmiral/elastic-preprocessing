@@ -1,7 +1,6 @@
 import config
 import json
 import pandas as pd
-import numpy as np
 import gzip
 import io
 from typing import List
@@ -40,7 +39,8 @@ else:
 neckar.columns = ["class", "dbp_url", "wp_url", "wd_url", "label"]
 legit_ids: set = set(neckar["wd_url"])
 dbp_ids: pd.DataFrame = pd.DataFrame(label.replace("http://de.dbpedia.org/resource/", "dbr:") for label in neckar["dbp_url"])
-dbp_ids.columns = ["dbp_url"]
+dbp_ids["wd_url"] = neckar["wd_url"]
+dbp_ids.columns = ["dbp_url", "wd_url"]
 
 ######### DBP
 
@@ -58,10 +58,11 @@ else:
     langlinks = pd.read_csv(config.DBP_LANGLINKS_FILTERED)
     langlinks.columns = ["dbp_url", "en"]
 
-legit_dbp_ids: pd.DataFrame = langlinks.set_index("en")
-legit_dbp_ids = legit_dbp_ids.to_dict()
+legit_dbp_ids_orig: pd.DataFrame = langlinks.set_index("en")
+legit_dbp_ids = legit_dbp_ids_orig.to_dict()
 
-
+# this is ridiculously slow. maybe better extract the embeddings and labels,
+# put them together, merge them into legits and hope for the best?
 print("Load DBPedia embeddings...", flush=True)
 for file in config.DBP_PATH:
     filtered_file = "".join([file[:-3], "_filtered.csv"])
@@ -73,14 +74,13 @@ for file in config.DBP_PATH:
         for id in legit_dbp_ids["dbp_url"]:
             try:
                 embedding = keyed_vectors.get_vector(id).tolist()
-                embeddings = embeddings.append([[legit_dbp_ids["dbp_url"][id], embedding]]) # assign the german dbp label
+                embeddings = embeddings.append([[legit_dbp_ids["dbp_url"][id], legit_dbp_ids["wd_url"][id], embedding]]) # assign the german dbp label
             except KeyError:
                 pass
         try:
-            embeddings.columns = ["dbp_url", "embedding"]
+            embeddings.columns = ["dbp_url", "id", "embedding"]
             embeddings["dbp_url"] = [label.replace("dbr:", "http://de.dbpedia.org/resource/") for label in embeddings["dbp_url"]]
             print("Write as csv...")
-            embeddings.columns = ["id", "embedding"]
             embeddings.to_csv(file[:-3] + "_filtered.csv", index=False)
         except ValueError:
             print(file + "_filtered.csv is empty. Will not write file.")
