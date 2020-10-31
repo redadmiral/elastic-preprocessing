@@ -7,6 +7,9 @@ URLS=(
   "https://dl.fbaipublicfiles.com/torchbiggraph/wikidata_translation_v1.tsv.gz"
   "http://data.dws.informatik.uni-mannheim.de/kgvec2go/iswc/dbpedia_500_4_sg_100/dbpedia_500_4_sg_100_vectors.kv"
   "http://data.dws.informatik.uni-mannheim.de/kgvec2go/iswc/dbpedia_500_4_sg_200/dbpedia_500_4_sg_200_vectors.kv"
+  "http://data.dws.informatik.uni-mannheim.de/kgvec2go/iswc/dbpedia_500_4_cbow_200/dbpedia_500_4_cbow_200_v2.kv.vectors.npy"
+  "http://data.dws.informatik.uni-mannheim.de/kgvec2go/iswc/dbpedia_500_4_sg_100/dbpedia_500_4_sg_100_vectors.kv.vectors.npy"
+  "http://data.dws.informatik.uni-mannheim.de/kgvec2go/iswc/dbpedia_500_4_sg_200/dbpedia_500_4_sg_200_vectors.kv.vectors.npy"
   "http://data.dws.informatik.uni-mannheim.de/kgvec2go/iswc/dbpedia_500_4_cbow_200/dbpedia_500_4_cbow_200_v2.kv"
   "https://downloads.dbpedia.org/repo/dbpedia/generic/interlanguage-links/2016.10.01/interlanguage-links_lang=de.ttl.bz2"
   "http://event.ifi.uni-heidelberg.de/wp-content/uploads/2017/05/WikidataDELODLinks_20170320_NECKAR_1_0.json_.gz"
@@ -15,7 +18,8 @@ URLS=(
 declare -A QUERIES
 QUERIES=(
   ["pr"]="select ?item ?rank where {?item rdfs:label ?label. ?item rank:hasRDFRank ?rank.}"
-  ["label"]="select ?item ?label ?altLabel where {?item rdfs:label ?label. ?item skos:altLabel ?altLabel.}"
+  ["label"]="select ?item ?label where {?item rdfs:label ?label.}"
+  ["altlabel"]="select ?item ?altLabel where {?item skos:altLabel ?altLabel.}"
 )
 
 PREFIXES=(
@@ -61,3 +65,9 @@ done
 for url in "${URLS[@]}"; do
   download $url
 done
+
+echo Handle files:
+
+gzip -d < $DATAFOLDER/WikidataDELODLinks_20170320_NECKAR_1_0.json_.gz > $DATAFOLDER/WikidataDELODLinks_20170320_NECKAR_1_0.json
+gzip -d < $DATAFOLDER/wikidata_translation_v1.tsv.gz | grep wikidata | gzip > $DATAFOLDER/wikidata_translation_v1.tsv.gz
+bunzip2 -c interlanguage-links_lang=de.ttl.bz2 | grep http://dbpedia.org/resource > interlanguage-links_de_en.ttl

@@ -14,10 +14,12 @@ ELASTIC_PORT = 9200
 # all file paths from this elastic-pp directory
 
 # input files
-NECKAR_PATH = "data/neckar.json"
+NECKAR_PATH = "data/WikidataDELODLinks_20170320_NECKAR_1_0.json"
 RANK_PATH = "data/response_pr.csv"
 EMBEDDINGS_PATH = "data/wikidata_translation_v1.tsv.gz"
+LABELS_PATH = "data/response_labels.csv"
 ALTLABELS_PATH = "data/response_altlabels.csv"
+
 DBP_PATH = [
     "data/dbpedia_500_4_sg_100_vectors.kv",
     "data/dbpedia_500_4_cbow_200_v2.kv",
@@ -25,16 +27,10 @@ DBP_PATH = [
 ]
 
 DBP_LANGLINKS = "data/interlanguage-links_de_en.ttl"
-DBP_LANGLINKS_FILTERED = "data/interlanguage-links_de_en_parsed.csv"
+
 # path to output files
 NECKAR_FILTERED_PATH = "data/neckar_filtered.csv"
 RANK_FILTERED_PATH = "data/pr_filtered.csv"
 EMBEDDINGS_FILTERED_PATH = "data/embeddings_filtered.csv"
 ALTLABELS_FILTERED_PATH = "data/altlabels_filtered.csv"
-
-
-# Keys from neckar file, which shall be in the es index
-NECKAR_KEYS = ["wd_url", "wp_url", "dbp_url", "label", "class"]
-PR_KEYS = ["pr"]
-EMBEDDINGS_KEYS = ["embedding"]
-ALTLABELS_KEYS = ["altlabel", "wd_url"]
+DBP_LANGLINKS_FILTERED = "data/interlanguage-links_de_en_parsed.csv"

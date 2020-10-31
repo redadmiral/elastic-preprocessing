@@ -29,6 +29,10 @@ if not os.path.isfile(config.NECKAR_FILTERED_PATH):
     neckar['WD_id'] = 'http://www.wikidata.org/entity/' + neckar['WD_id'].astype(str)
 
     neckar.columns = ["class", "dbp_url", "wp_url", "id", "label"]
+    neckar.drop("label")
+    labels = pd.read_csv(config.LABELS_PATH)
+    labels.colums = ["id", "label"]
+    neckar.merge(right=labels, on="id")
     neckar.to_csv(config.NECKAR_FILTERED_PATH, index=False)
     endtime = time.time()
     print("NECKar evaluation time: " + str(endtime-starttime))
