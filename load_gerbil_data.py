@@ -3,7 +3,7 @@ import gensim
 
 ## LABELS
 
-labels = pd.read_csv("data/labels_de_head.ttl", sep = " ", skiprows=1)
+labels = pd.read_csv("data/labels_de.ttl", sep = " ", skiprows=1)
 labels.columns = ["de_url", "pred", "label", "dot"]
 labels = labels[["de_url", "label"]]
 labels["de_url"] = labels["de_url"].str.replace("<", "")
