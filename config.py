@@ -17,7 +17,7 @@ ELASTIC_PORT = 9200
 NECKAR_PATH = "data/WikidataDELODLinks_20170320_NECKAR_1_0.json"
 RANK_PATH = "data/response_pr.csv"
 EMBEDDINGS_PATH = "data/wikidata_translation_v1.tsv.gz"
-LABELS_PATH = "data/response_labels.csv"
+LABELS_PATH = "data/response_label.csv"
 ALTLABELS_PATH = "data/response_altlabels.csv"
 
 DBP_PATH = [
