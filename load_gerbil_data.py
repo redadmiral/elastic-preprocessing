@@ -13,7 +13,7 @@ labels["label"] = labels["label"].str.replace("@de", "")
 
 ## GET ALTLABELS
 
-altlabels = pd.read_csv("data/redirects_de_head.ttl", sep = " ", skiprows=1)
+altlabels = pd.read_csv("data/redirects_de.ttl", sep = " ", skiprows=1)
 altlabels.columns = ["label", "pred", "de_url", "dot"]
 altlabels = altlabels[["de_url", "label"]]
 altlabels["de_url"] = altlabels["de_url"].str.replace("<", "").str.replace(">", "")
@@ -23,7 +23,7 @@ altlabels["label"] = altlabels["label"].str.replace("_", " ")
 labels = labels.append(altlabels)
 
 ## MERGE WITH LANGUAGE LINKS
-langlinks = pd.read_csv("data/interlinks_de_head.ttl", sep = " ", skiprows=1)
+langlinks = pd.read_csv("data/interlinks_de.ttl", sep = " ", skiprows=1)
 langlinks.columns = ["de_url", "pred", "url", "dot"]
 langlinks = langlinks[["de_url", "url"]]
 langlinks["de_url"] = langlinks["de_url"].str.replace("<", "").str.replace(">", "")
