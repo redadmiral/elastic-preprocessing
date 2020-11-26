@@ -31,14 +31,23 @@ langlinks["url"] = langlinks["url"].str.replace("<", "").str.replace(">", "")
 labels = labels.merge(langlinks)
 
 ## LOAD VECTORS
+def get_vector(url: str, vectors: gensim.models.KeyedVectors):
+    try:
+        response = vectors.get_vector(url)
+    except KeyError:
+        response = None
+    return response
 
-vectors = gensim.models.KeyedVectors.load("data/dbpedia_500_4_sg_200_vectors.kv")
-url = vectors.index2word
-vector = list(vectors.vectors)
+keyed_vectors = gensim.models.KeyedVectors.load("data/dbpedia_500_4_sg_200_vectors.kv")
 
+result = pd.DataFrame()
 
-vectors = pd.DataFrame(url, vector)
-vectors.columns = ["url", "embedding"]
-labels = labels.merge(vectors)
+for row in labels.iterrows():
+    try:
+        id = ":".join(["dbr", row[1]["url"].split("/")[-1]])
+        embedding = keyed_vectors.get_vector(id)
+    except KeyError:
+        embedding = None
+    result = result.append([[row[1]["url"], row[1]["de_url"], row[1]["label"], embedding]])
 
-labels.to_csv("gerbil_index.csv")
+result.to_csv("gerbil_index.csv")
