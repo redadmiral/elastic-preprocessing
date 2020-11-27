@@ -5,7 +5,6 @@ import helpers
 import decouple
 import os
 import pandas as pd
-import numpy as np
 from typing import List
 
 elastic = es.Elasticsearch([{"host": config.ELASTIC_URL, "port": config.ELASTIC_PORT}])
