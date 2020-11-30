@@ -42,6 +42,15 @@ langlinks["de_url"] = langlinks["de_url"].str.replace("<", "").str.replace(">", 
 langlinks["url"] = langlinks["url"].str.replace("<", "").str.replace(">", "")
 labels = labels.merge(langlinks, how=mergestyle)
 
+## GET PR
+pr = pd.read_csv("data/pr_dbpedia.ttl", sep=" ")
+pr.columns = ["de_url", "pred", "pr", "dot"]
+pr = pr[["de_url", "pr"]]
+pr["de_url"] = pr["de_url"].str.replace("<", "").str.replace(">", "")
+pr["pr"] = pr["pr"].str[:-42]
+labels = labels.merge(pr, how=mergestyle)
+
+
 print(time.ctime() + ": Load vectors...", flush=True)
 ## LOAD VECTORS
 keyed_vectors = gensim.models.KeyedVectors.load("data/dbpedia_500_4_sg_200_vectors.kv")
