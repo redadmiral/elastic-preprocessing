@@ -34,16 +34,9 @@ altlabels["label"] = altlabels["label"].str.replace("_", " ")
 
 labels = labels.append(altlabels)
 print(time.ctime() + ": Merge language links...", flush=True)
-## MERGE WITH LANGUAGE LINKS
-langlinks = pd.read_csv("data/interlinks_de" + test + ".ttl", sep = " ", skiprows=1)
-langlinks.columns = ["de_url", "pred", "url", "dot"]
-langlinks = langlinks[["de_url", "url"]]
-langlinks["de_url"] = langlinks["de_url"].str.replace("<", "").str.replace(">", "")
-langlinks["url"] = langlinks["url"].str.replace("<", "").str.replace(">", "")
-labels = labels.merge(langlinks, how=mergestyle)
 
 ## GET PR
-pr = pd.read_csv("data/pr_dbpedia.ttl", sep=" ")
+pr = pd.read_csv("data/rdf2vec/dbp_pr" + test + ".nt", sep=" ")
 pr.columns = ["de_url", "pred", "pr", "dot"]
 pr = pr[["de_url", "pr"]]
 pr["de_url"] = pr["de_url"].str.replace("<", "").str.replace(">", "")
@@ -53,21 +46,18 @@ labels = labels.merge(pr, how=mergestyle)
 
 print(time.ctime() + ": Load vectors...", flush=True)
 ## LOAD VECTORS
-keyed_vectors = gensim.models.KeyedVectors.load("data/dbpedia_500_4_sg_200_vectors.kv")
-vectors = keyed_vectors.vectors
-urls = keyed_vectors.index2word
+
+vectors = np.load("data/rdf2vec/embeddings.npy", allow_pickle=True)
+urls = np.load("data/rdf2vec/entities.npy", allow_pickle=True)
 
 print(time.ctime() + ": Flatten and create DF...", flush=True)
-#vectors = np.genfromtxt("data/vectorshead.csv", delimiter = ", ")
 vectors = list(map(str, vectors.tolist()))
-#urls = list(pd.read_csv("data/urlshead.csv", header=None)[0])
 
-embeddings = pd.DataFrame(list(zip(urls, vectors)), columns=["url", "embedding"])
-embeddings["url"] = embeddings["url"].str.replace("dbr:", "http://dbpedia.org/resource/")
+embeddings = pd.DataFrame(list(zip(urls, vectors)), columns=["de_url", "embedding"])
 
 print(time.ctime() + ": Merge embeddings with labels...", flush=True)
 labels = labels.merge(embeddings, how=mergestyle)
 
 print(time.ctime() + ": Write to disk...", flush=True)
-labels.columns = ["id", "label", "url", "pr", "embedding"]
+labels.columns = ["id", "label", "pr", "embedding"]
 labels.to_csv("data/gerbil_index_" + mergestyle + ".csv")
